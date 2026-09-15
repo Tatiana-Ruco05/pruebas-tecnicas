@@ -1,0 +1,418 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* =========================
+   PÁGINA
+========================= */
+
+.board-page {
+  min-height: 100vh;
+  background: #eef2f5;
+}
+
+/* =========================
+   ENCABEZADO
+========================= */
+
+.board-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 150px;
+  background: #073b55;
+  color: white;
+  padding: 20px 30px;
+}
+
+.board-title {
+  flex: 1;
+  text-align: center;
+}
+
+.board-title h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.board-title p {
+  margin: 8px 0 0;
+  color: #d7e4ea;
+  font-size: 17px;
+}
+
+.board-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-left: auto;
+}
+
+/* =========================
+   BOTONES ACCIÓN
+========================= */
+
+.back-button,
+.new-note-button {
+  background: #073b55;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 11px 18px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.back-button:hover,
+.new-note-button:hover {
+  background: #0d4a68;
+  transform: translateY(-1px);
+}
+
+/* =========================
+   TABLERO
+========================= */
+
+.board {
+  position: relative;
+
+  margin: 25px;
+
+  min-height: calc(100vh - 200px);
+
+  background: #e7eef2;
+
+  border: 2px solid #b7c9d2;
+
+  border-radius: 18px;
+
+  overflow: auto;
+
+  box-shadow:
+    inset 0 0 25px
+    rgba(7, 59, 85, 0.04);
+}
+
+/* =========================
+   NOTAS
+========================= */
+
+.note {
+  position: absolute;
+
+  width: 280px;
+
+  min-height: 250px;
+
+  padding: 20px;
+
+  border-radius: 14px;
+
+  cursor: grab;
+
+  user-select: none;
+
+  z-index: 2;
+
+  transition:
+    box-shadow 0.2s,
+    transform 0.15s;
+}
+
+/* PENDIENTE */
+
+.note.pendiente {
+  background: #fff4b8;
+
+  border: 4px solid #e0a800;
+}
+
+/* EN CURSO */
+
+.note.en-curso {
+  background: #dceeff;
+
+  border: 4px solid #2980b9;
+}
+
+/* HECHO */
+
+.note.hecho {
+  background: #dff3e4;
+
+  border: 4px solid #3a9d5d;
+}
+
+/* HOVER */
+
+.note:hover {
+  box-shadow:
+    0 8px 20px
+    rgba(0, 0, 0, 0.20);
+}
+
+/* ARRASTRANDO */
+
+.note.dragging {
+  z-index: 1000;
+
+  opacity: 0.92;
+
+  transform:
+    rotate(1deg)
+    scale(1.02);
+
+  box-shadow:
+    0 12px 25px
+    rgba(0, 0, 0, 0.25);
+
+  cursor: grabbing;
+}
+
+/* =========================
+   CONTENIDO
+========================= */
+
+.note h2 {
+  margin-top: 0;
+
+  margin-bottom: 15px;
+
+  color: #263238;
+
+  font-size: 21px;
+}
+
+.note-text {
+  min-height: 65px;
+
+  color: #555;
+
+  line-height: 1.5;
+
+  margin-bottom: 15px;
+}
+
+/* =========================
+   ESTADO
+========================= */
+
+.status-section {
+  margin-top: 12px;
+}
+
+.status-section label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  font-size: 13px;
+
+  font-weight: bold;
+
+  color: #455a64;
+}
+
+.status-select {
+  width: 100%;
+
+  padding: 9px 12px;
+
+  border-radius: 8px;
+
+  font-weight: bold;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+  outline: none;
+
+  background: white;
+
+  border: 2px solid #b7c9d2;
+}
+
+/* =========================
+   EDICIÓN
+========================= */
+
+.note-title {
+  width: 100%;
+
+  padding: 10px;
+
+  border: 1px solid rgba(0, 0, 0, 0.15);
+
+  border-radius: 6px;
+
+  font-size: 18px;
+
+  font-weight: bold;
+
+  background: #ffffff;
+
+  color: #111827;
+}
+
+.note-content {
+  width: 100%;
+
+  height: 100px;
+
+  margin-top: 12px;
+
+  padding: 10px;
+
+  border: 1px solid rgba(0, 0, 0, 0.15);
+
+  border-radius: 6px;
+
+  resize: vertical;
+
+  font-family: Arial, sans-serif;
+
+  background: #ffffff;
+
+  color: #111827;
+}
+
+.note-status {
+  width: 100%;
+
+  margin-top: 12px;
+
+  padding: 10px;
+
+  border: 1px solid rgba(0, 0, 0, 0.15);
+
+  border-radius: 6px;
+
+  background: #ffffff;
+
+  color: #111827;
+
+  font-weight: bold;
+}
+
+.status-select,
+.note-status,
+.note-title,
+.note-content {
+  box-sizing: border-box;
+}
+
+.status-select {
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+/* =========================
+   BOTONES
+========================= */
+
+.note-buttons {
+  display: flex;
+
+  gap: 10px;
+
+  margin-top: 18px;
+}
+
+.note-buttons button {
+  border: none;
+
+  padding: 9px 14px;
+
+  border-radius: 7px;
+
+  color: white;
+
+  cursor: pointer;
+
+  font-weight: bold;
+
+  transition: 0.2s;
+}
+
+/* EDITAR */
+
+.edit-button {
+  background: #073b55;
+}
+
+.edit-button:hover {
+  background: #0b526f;
+}
+
+/* ELIMINAR */
+
+.delete-button {
+  background: #d9534f;
+}
+
+.delete-button:hover {
+  background: #c9302c;
+}
+
+/* GUARDAR */
+
+.save-button {
+  background: #4caf50;
+}
+
+.save-button:hover {
+  background: #388e3c;
+}
+
+/* CANCELAR */
+
+.cancel-button {
+  background: #777;
+}
+
+.cancel-button:hover {
+  background: #555;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 800px) {
+
+  .board-title {
+    width: 300px;
+  }
+
+  .board-title h1 {
+    font-size: 24px;
+  }
+
+  .back-button {
+    left: 15px;
+
+    padding: 9px 12px;
+
+    font-size: 12px;
+  }
+
+  .new-note-button {
+    right: 15px;
+
+    padding: 10px 12px;
+
+    font-size: 12px;
+  }
+
+}

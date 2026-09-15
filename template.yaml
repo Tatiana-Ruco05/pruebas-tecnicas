@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: APP PRUEBA - infraestructura local y despliegue de métricas
+
+Globals:
+  Function:
+    Timeout: 10
+    Runtime: nodejs20.x
+    MemorySize: 256
+
+Resources:
+  MetricsApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'POST,OPTIONS'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+
+  MetricsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: app-prueba-metrics
+      CodeUri: lambda/metrics
+      Handler: index.handler
+      Description: Calcula métricas del tablero para el dashboard
+      Events:
+        MetricsApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MetricsApi
+            Path: /metrics
+            Method: post
+
+Outputs:
+  MetricsApiUrl:
+    Description: URL de la API Lambda de métricas
+    Value: !Sub "https://${MetricsApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/metrics"

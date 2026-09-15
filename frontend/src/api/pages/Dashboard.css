@@ -1,0 +1,125 @@
+.dashboard {
+  min-height: 100vh;
+  background: #f4f6f8;
+}
+
+.dashboard-header {
+  background: #00304d;
+  color: white;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.dashboard-header p {
+  margin: 5px 0 0;
+  opacity: 0.8;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.role {
+  background: #39a900;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.user-info button {
+  border: none;
+  background: white;
+  color: #00304d;
+  padding: 9px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.dashboard-content {
+  padding: 35px 40px;
+}
+
+.dashboard-content h2 {
+  color: #00304d;
+  margin-bottom: 5px;
+}
+
+.welcome {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.metric-card {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  border-left: 5px solid #39a900;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.metric-title {
+  display: block;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.metric-card strong {
+  font-size: 32px;
+  color: #00304d;
+}
+
+.dashboard-info {
+  background: white;
+  margin-top: 30px;
+  padding: 25px;
+  border-radius: 10px;
+}
+
+.dashboard-info h3 {
+  color: #00304d;
+}
+
+.dashboard-info p {
+  color: #666;
+}
+
+.board-button {
+  background: #39a900;
+  color: white;
+  border: none;
+  padding: 11px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.board-button:hover {
+  background: #2f8f00;
+}
+
+@media (max-width: 800px) {
+  .metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}

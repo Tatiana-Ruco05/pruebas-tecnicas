@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "app-prueba-stack"
+resolve_s3 = true
+s3_prefix = "app-prueba"
+region = "us-east-1"
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
