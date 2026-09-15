@@ -19,6 +19,7 @@ function Dashboard() {
 
       if (metricsLambdaUrl) {
         const notasRespuesta = await api.get("/notas");
+
         const lambdaRespuesta = await fetch(metricsLambdaUrl, {
           method: "POST",
           headers: {
@@ -30,7 +31,9 @@ function Dashboard() {
         });
 
         if (!lambdaRespuesta.ok) {
-          throw new Error("No se pudieron calcular las métricas con Lambda");
+          throw new Error(
+            "No se pudieron calcular las métricas con Lambda"
+          );
         }
 
         datosMetricas = await lambdaRespuesta.json();
@@ -39,12 +42,14 @@ function Dashboard() {
         datosMetricas = respuesta.data;
       }
 
-      setMetricas(datosMetricas.metricas || {
-        total: 0,
-        pendientes: 0,
-        enCurso: 0,
-        hechas: 0,
-      });
+      setMetricas(
+        datosMetricas.metricas || {
+          total: 0,
+          pendientes: 0,
+          enCurso: 0,
+          hechas: 0,
+        }
+      );
     } catch (error) {
       console.error("Error cargando métricas:", error);
     }
@@ -61,119 +66,74 @@ function Dashboard() {
   const enCurso = metricas.enCurso;
   const hechas = metricas.hechas;
 
-  const cerrarSesion = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("usuario");
-    window.location.href = "/";
-  };
-
-  const irAlTablero = () => {
-    window.location.href = "/board";
-  };
-
-  const irAUsuarios = () => {
-    window.location.href = "/usuarios";
-  };
-
   return (
-    <div className="dashboard">
+    <div className="dashboard-content">
 
-      <header className="dashboard-header">
+        {/* ENCABEZADO DEL CONTENIDO */}
 
-        <div>
-          <h1>APP PRUEBA</h1>
-          <p>Portal de Equipo</p>
-        </div>
+        <div className="dashboard-top">
 
-        <div className="user-info">
-          <span>{usuario?.nombre}</span>
+          <div>
+            <h2>Dashboard</h2>
 
-          <span className="role">
+            <p>
+              Bienvenido, {usuario?.nombre}
+            </p>
+          </div>
+
+          <div className="dashboard-role">
             {usuario?.rol}
-          </span>
+          </div>
 
-          <button onClick={cerrarSesion}>
-            Cerrar sesión
-          </button>
         </div>
 
-      </header>
-
-      <main className="dashboard-content">
-
-        <h2>Dashboard</h2>
-
-        <p className="welcome">
-          Bienvenido, {usuario?.nombre}
-        </p>
+        {/* =================================================
+            MÉTRICAS
+        ================================================= */}
 
         <section className="metrics">
 
           <div className="metric-card">
+
             <span className="metric-title">
               Total de notas
             </span>
 
             <strong>{total}</strong>
+
           </div>
 
           <div className="metric-card">
+
             <span className="metric-title">
               Pendientes
             </span>
 
             <strong>{pendientes}</strong>
+
           </div>
 
           <div className="metric-card">
+
             <span className="metric-title">
               En curso
             </span>
 
             <strong>{enCurso}</strong>
+
           </div>
 
           <div className="metric-card">
+
             <span className="metric-title">
               Hechas
             </span>
 
             <strong>{hechas}</strong>
+
           </div>
 
         </section>
-
-        <section className="dashboard-info">
-
-          <h3>Tablero de equipo</h3>
-
-          <p>
-            Desde el tablero puedes crear, editar,
-            cambiar el estado y eliminar las notas
-            del equipo.
-          </p>
-
-          <div className="dashboard-actions">
-            <button
-              className="board-button"
-              onClick={irAlTablero}
-            >
-              Ir al tablero
-            </button>
-
-            {usuario?.rol === "ADMIN" && (
-              <button
-                className="users-button"
-                onClick={irAUsuarios}
-              >
-                Gestionar usuarios
-              </button>
-            )}
-          </div>
-
-        </section>
-
-      </main>
 
     </div>
   );

@@ -28,7 +28,10 @@ async function handler(event = {}) {
     notas = event.notas;
   } else if (event.body) {
     try {
-      const parsed = JSON.parse(event.body);
+      const body = event.isBase64Encoded
+        ? Buffer.from(event.body, "base64").toString("utf8")
+        : event.body;
+      const parsed = JSON.parse(body);
 
       if (Array.isArray(parsed.notas)) {
         notas = parsed.notas;
@@ -44,6 +47,9 @@ async function handler(event = {}) {
 
   return {
     statusCode: 200,
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
       success: true,
       metricas,

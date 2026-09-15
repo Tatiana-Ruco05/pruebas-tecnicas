@@ -7,7 +7,7 @@ Description: APP PRUEBA - Arquitectura AWS con EC2, Lambda, S3 y CloudFront
 Globals:
   Function:
     Timeout: 10
-    Runtime: nodejs20.x
+    Runtime: nodejs24.x
     MemorySize: 256
 
 Parameters:

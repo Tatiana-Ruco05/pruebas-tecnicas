@@ -6,7 +6,23 @@ function Board() {
   const [notas, setNotas] = useState([]);
   const [editando, setEditando] = useState(null);
   const [arrastrando, setArrastrando] = useState(null);
+
+  // =========================
+  // MODAL PARA CREAR
+  // =========================
+
+  const [modalCrear, setModalCrear] = useState(false);
+
+  const [nuevoTitulo, setNuevoTitulo] = useState("");
+  const [nuevoContenido, setNuevoContenido] = useState("");
+  const [nuevoEstado, setNuevoEstado] =
+    useState("PENDIENTE");
+
   const notasRef = useRef([]);
+
+  // =========================
+  // MANTENER REFERENCIA
+  // =========================
 
   useEffect(() => {
     notasRef.current = notas;
@@ -29,24 +45,54 @@ function Board() {
   };
 
   useEffect(() => {
-    const cargaInicial = window.setTimeout(cargarNotas, 0);
+    const cargaInicial = window.setTimeout(
+      cargarNotas,
+      0
+    );
 
-    return () => window.clearTimeout(cargaInicial);
+    return () =>
+      window.clearTimeout(cargaInicial);
   }, []);
 
   // =========================
-  // VOLVER AL DASHBOARD
+  // ABRIR MODAL NUEVA NOTA
   // =========================
 
-  const volverDashboard = () => {
-    window.location.href = "/";
+  const abrirNuevaNota = () => {
+    setNuevoTitulo("");
+    setNuevoContenido("");
+    setNuevoEstado("PENDIENTE");
+
+    setModalCrear(true);
+  };
+
+  // =========================
+  // CERRAR MODAL
+  // =========================
+
+  const cerrarModalCrear = () => {
+    setModalCrear(false);
+
+    setNuevoTitulo("");
+    setNuevoContenido("");
+    setNuevoEstado("PENDIENTE");
   };
 
   // =========================
   // CREAR NOTA
   // =========================
 
-  const nuevaNota = async () => {
+  const crearNota = async (e) => {
+    e.preventDefault();
+
+    if (!nuevoTitulo.trim()) {
+      alert(
+        "Por favor escribe un título para la nota"
+      );
+
+      return;
+    }
+
     try {
       const posicionX =
         40 + (notas.length % 4) * 310;
@@ -55,23 +101,28 @@ function Board() {
         40 +
         Math.floor(notas.length / 4) * 290;
 
-      const respuesta = await api.post("/notas", {
-        titulo: "Nueva nota",
+      const respuesta = await api.post(
+        "/notas",
+        {
+          titulo: nuevoTitulo.trim(),
 
-        contenido:
-          "Escribe aquí el contenido",
+          contenido:
+            nuevoContenido.trim(),
 
-        estado: "PENDIENTE",
+          estado: nuevoEstado,
 
-        posicion_x: posicionX,
+          posicion_x: posicionX,
 
-        posicion_y: posicionY,
-      });
+          posicion_y: posicionY,
+        }
+      );
 
-      setNotas([
-        ...notas,
+      setNotas((notasActuales) => [
+        ...notasActuales,
         respuesta.data.nota,
       ]);
+
+      cerrarModalCrear();
     } catch (error) {
       console.error(error);
 
@@ -88,24 +139,33 @@ function Board() {
   };
 
   // =========================
-  // GUARDAR NOTA
+  // GUARDAR NOTA EDITADA
   // =========================
 
   const guardarNota = async (nota) => {
+    if (!nota.titulo.trim()) {
+      alert(
+        "El título de la nota no puede estar vacío"
+      );
+
+      return;
+    }
+
     try {
       const respuesta = await api.put(
         `/notas/${nota.id}`,
         {
-          titulo: nota.titulo,
+          titulo: nota.titulo.trim(),
 
-          contenido: nota.contenido,
+          contenido:
+            nota.contenido.trim(),
 
           estado: nota.estado,
         }
       );
 
-      setNotas(
-        notas.map((n) =>
+      setNotas((notasActuales) =>
+        notasActuales.map((n) =>
           n.id === nota.id
             ? respuesta.data.nota
             : n
@@ -116,8 +176,20 @@ function Board() {
     } catch (error) {
       console.error(error);
 
-      alert("No se pudo guardar la nota");
+      alert(
+        "No se pudo guardar la nota"
+      );
     }
+  };
+
+  // =========================
+  // CANCELAR EDICIÓN
+  // =========================
+
+  const cancelarEdicion = () => {
+    setEditando(null);
+
+    cargarNotas();
   };
 
   // =========================
@@ -136,8 +208,8 @@ function Board() {
     try {
       await api.delete(`/notas/${id}`);
 
-      setNotas(
-        notas.filter(
+      setNotas((notasActuales) =>
+        notasActuales.filter(
           (nota) => nota.id !== id
         )
       );
@@ -146,7 +218,9 @@ function Board() {
     } catch (error) {
       console.error(error);
 
-      alert("No se pudo eliminar la nota");
+      alert(
+        "No se pudo eliminar la nota"
+      );
     }
   };
 
@@ -159,8 +233,8 @@ function Board() {
     campo,
     valor
   ) => {
-    setNotas(
-      notas.map((nota) =>
+    setNotas((notasActuales) =>
+      notasActuales.map((nota) =>
         nota.id === id
           ? {
               ...nota,
@@ -187,8 +261,8 @@ function Board() {
         }
       );
 
-      setNotas(
-        notas.map((n) =>
+      setNotas((notasActuales) =>
+        notasActuales.map((n) =>
           n.id === nota.id
             ? respuesta.data.nota
             : n
@@ -207,16 +281,30 @@ function Board() {
   // COMENZAR ARRASTRE
   // =========================
 
-  const comenzarArrastre = (
-    e,
-    nota
-  ) => {
-    if (editando === nota.id) {
+  const comenzarArrastre = (e, nota) => {
+    if (e.button !== 0) {
+      return;
+    }
+
+    const elemento = e.target;
+
+    // No arrastrar al interactuar
+    // con botones, selectores o campos.
+    if (
+      elemento.closest("button") ||
+      elemento.closest("select") ||
+      elemento.closest("input") ||
+      elemento.closest("textarea")
+    ) {
       return;
     }
 
     const tablero =
       document.querySelector(".board");
+
+    if (!tablero) {
+      return;
+    }
 
     const rect =
       tablero.getBoundingClientRect();
@@ -266,21 +354,23 @@ function Board() {
       arrastrando.offsetY;
 
     x = Math.max(0, x);
-
     y = Math.max(0, y);
 
     setNotas((notasActuales) => {
-      const notasActualizadas = notasActuales.map((nota) =>
-        nota.id === arrastrando.id
-          ? {
-              ...nota,
-              posicion_x: x,
-              posicion_y: y,
-            }
-          : nota
-      );
+      const notasActualizadas =
+        notasActuales.map((nota) =>
+          nota.id === arrastrando.id
+            ? {
+                ...nota,
+                posicion_x: x,
+                posicion_y: y,
+              }
+            : nota
+        );
 
-      notasRef.current = notasActualizadas;
+      notasRef.current =
+        notasActualizadas;
+
       return notasActualizadas;
     });
   };
@@ -328,9 +418,7 @@ function Board() {
   // CLASE SEGÚN ESTADO
   // =========================
 
-  const obtenerClaseEstado = (
-    estado
-  ) => {
+  const obtenerClaseEstado = (estado) => {
     if (estado === "PENDIENTE") {
       return "pendiente";
     }
@@ -351,43 +439,36 @@ function Board() {
       className="board-page"
       onMouseMove={moverNota}
       onMouseUp={terminarArrastre}
+      onMouseLeave={terminarArrastre}
     >
+      <main className="board-content">
+        <section className="board-card">
+          <div className="board-list-header">
+            <div className="board-title">
+              <h2>Tablero de equipo</h2>
 
-      {/* =========================
-          ENCABEZADO
-      ========================= */}
+              <p>
+                Organiza las tareas y notas del equipo
+              </p>
+            </div>
 
-      <header className="board-header">
-        <div className="board-title">
-          <h1>Tablero de equipo</h1>
-          <p>Organiza las tareas y notas del equipo</p>
-        </div>
+            <div className="board-actions">
+              <button
+                className="new-note-button"
+                onClick={abrirNuevaNota}
+              >
+                + Nueva nota
+              </button>
+            </div>
+          </div>
 
-        <div className="board-actions">
-          <button className="back-button" onClick={volverDashboard}>
-            ← Volver
-          </button>
-
-          <button className="new-note-button" onClick={nuevaNota}>
-            + Nueva nota
-          </button>
-        </div>
-      </header>
-
-      {/* =========================
-          TABLERO
-      ========================= */}
-
-      <main className="board">
-
+          <div className="board">
         {notas.map((nota) => (
-
           <div
             className={`note ${obtenerClaseEstado(
               nota.estado
             )} ${
-              arrastrando?.id ===
-              nota.id
+              arrastrando?.id === nota.id
                 ? "dragging"
                 : ""
             }`}
@@ -397,24 +478,26 @@ function Board() {
               top: `${nota.posicion_y}px`,
             }}
             onMouseDown={(e) =>
-              comenzarArrastre(
-                e,
-                nota
-              )
+              comenzarArrastre(e, nota)
             }
           >
-
             {editando === nota.id ? (
-
-              /* =========================
-                 MODO EDICIÓN
-              ========================= */
-
               <>
+                {/* =========================
+                    EDICIÓN DIRECTA
+                ========================= */}
+
                 <input
+                  type="text"
                   className="note-title"
-                  value={nota.titulo}
-                  onMouseDown={(e) => e.stopPropagation()}
+                  value={nota.titulo || ""}
+                  placeholder="Título de la nota"
+                  onMouseDown={(e) =>
+                    e.stopPropagation()
+                  }
+                  onClick={(e) =>
+                    e.stopPropagation()
+                  }
                   onChange={(e) =>
                     cambiarCampo(
                       nota.id,
@@ -427,9 +510,15 @@ function Board() {
                 <textarea
                   className="note-content"
                   value={
-                    nota.contenido
+                    nota.contenido || ""
                   }
-                  onMouseDown={(e) => e.stopPropagation()}
+                  placeholder="Escribe el contenido..."
+                  onMouseDown={(e) =>
+                    e.stopPropagation()
+                  }
+                  onClick={(e) =>
+                    e.stopPropagation()
+                  }
                   onChange={(e) =>
                     cambiarCampo(
                       nota.id,
@@ -442,7 +531,12 @@ function Board() {
                 <select
                   className="note-status"
                   value={nota.estado}
-                  onMouseDown={(e) => e.stopPropagation()}
+                  onMouseDown={(e) =>
+                    e.stopPropagation()
+                  }
+                  onClick={(e) =>
+                    e.stopPropagation()
+                  }
                   onChange={(e) =>
                     cambiarCampo(
                       nota.id,
@@ -451,7 +545,6 @@ function Board() {
                     )
                   }
                 >
-
                   <option value="PENDIENTE">
                     Pendiente
                   </option>
@@ -463,54 +556,47 @@ function Board() {
                   <option value="HECHO">
                     Hecho
                   </option>
-
                 </select>
 
                 <div className="note-buttons">
-
                   <button
+                    type="button"
                     className="save-button"
                     onMouseDown={(e) =>
                       e.stopPropagation()
                     }
-                    onClick={() =>
-                      guardarNota(
-                        nota
-                      )
-                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+
+                      guardarNota(nota);
+                    }}
                   >
                     Guardar
                   </button>
 
                   <button
+                    type="button"
                     className="cancel-button"
                     onMouseDown={(e) =>
                       e.stopPropagation()
                     }
-                    onClick={() => {
-                      setEditando(
-                        null
-                      );
+                    onClick={(e) => {
+                      e.stopPropagation();
 
-                      cargarNotas();
+                      cancelarEdicion();
                     }}
                   >
                     Cancelar
                   </button>
-
                 </div>
               </>
-
             ) : (
-
-              /* =========================
-                 MODO NORMAL
-              ========================= */
-
               <>
-                <h2>
-                  {nota.titulo}
-                </h2>
+                {/* =========================
+                    VISTA NORMAL
+                ========================= */}
+
+                <h2>{nota.titulo}</h2>
 
                 <p className="note-text">
                   {nota.contenido}
@@ -519,7 +605,6 @@ function Board() {
                 {/* ESTADO */}
 
                 <div className="status-section">
-
                   <label>
                     Estado
                   </label>
@@ -537,7 +622,6 @@ function Board() {
                       e.stopPropagation()
                     }
                   >
-
                     <option value="PENDIENTE">
                       Pendiente
                     </option>
@@ -549,54 +633,186 @@ function Board() {
                     <option value="HECHO">
                       Hecho
                     </option>
-
                   </select>
-
                 </div>
 
                 {/* BOTONES */}
 
                 <div className="note-buttons">
-
                   <button
+                    type="button"
                     className="edit-button"
                     onMouseDown={(e) =>
                       e.stopPropagation()
                     }
-                    onClick={() =>
-                      editarNota(
-                        nota
-                      )
-                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+
+                      editarNota(nota);
+                    }}
                   >
                     Editar
                   </button>
 
                   <button
+                    type="button"
                     className="delete-button"
                     onMouseDown={(e) =>
                       e.stopPropagation()
                     }
-                    onClick={() =>
-                      eliminarNota(
-                        nota.id
-                      )
-                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+
+                      eliminarNota(nota.id);
+                    }}
                   >
                     Eliminar
                   </button>
-
                 </div>
-
               </>
             )}
-
           </div>
-
         ))}
-
+          </div>
+        </section>
       </main>
 
+      {/* =========================
+          MODAL SOLO PARA CREAR
+      ========================= */}
+
+      {modalCrear && (
+        <div
+          className="modal-overlay"
+          onMouseDown={(e) => {
+            if (
+              e.target === e.currentTarget
+            ) {
+              cerrarModalCrear();
+            }
+          }}
+        >
+          <div
+            className="note-modal"
+            onMouseDown={(e) =>
+              e.stopPropagation()
+            }
+          >
+            <div className="modal-header">
+              <div>
+                <h2>
+                  Nueva nota
+                </h2>
+
+                <p>
+                  Completa la información de la nota
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="modal-close"
+                onClick={cerrarModalCrear}
+              >
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={crearNota}>
+              {/* TÍTULO */}
+
+              <div className="form-group">
+                <label htmlFor="nuevo-titulo">
+                  Título
+                </label>
+
+                <input
+                  id="nuevo-titulo"
+                  type="text"
+                  value={nuevoTitulo}
+                  onChange={(e) =>
+                    setNuevoTitulo(
+                      e.target.value
+                    )
+                  }
+                  placeholder="Escribe el título de la nota"
+                  maxLength={150}
+                  autoFocus
+                />
+              </div>
+
+              {/* CONTENIDO */}
+
+              <div className="form-group">
+                <label htmlFor="nuevo-contenido">
+                  Contenido
+                </label>
+
+                <textarea
+                  id="nuevo-contenido"
+                  value={nuevoContenido}
+                  onChange={(e) =>
+                    setNuevoContenido(
+                      e.target.value
+                    )
+                  }
+                  placeholder="Escribe aquí el contenido de la nota..."
+                  rows="6"
+                />
+              </div>
+
+              {/* ESTADO */}
+
+              <div className="form-group">
+                <label htmlFor="nuevo-estado">
+                  Estado
+                </label>
+
+                <select
+                  id="nuevo-estado"
+                  value={nuevoEstado}
+                  onChange={(e) =>
+                    setNuevoEstado(
+                      e.target.value
+                    )
+                  }
+                >
+                  <option value="PENDIENTE">
+                    Pendiente
+                  </option>
+
+                  <option value="EN_CURSO">
+                    En curso
+                  </option>
+
+                  <option value="HECHO">
+                    Hecho
+                  </option>
+                </select>
+              </div>
+
+              {/* BOTONES */}
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="cancel-modal-button"
+                  onClick={cerrarModalCrear}
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="submit"
+                  className="save-modal-button"
+                >
+                  Crear nota
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -13,7 +13,40 @@ body {
 
 .board-page {
   min-height: 100vh;
-  background: #eef2f5;
+  background: linear-gradient(180deg, #f7fbff 0%, #edf5fb 100%);
+  color: #24343d;
+}
+
+.board-content {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 35px 40px;
+}
+
+.board-card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  padding: 32px;
+  background: #ffffff;
+  border: 1px solid #dce7ee;
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(5, 18, 28, 0.12);
+}
+
+.board-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #e2e9ee;
 }
 
 /* =========================
@@ -25,26 +58,27 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  min-height: 150px;
-  background: #073b55;
-  color: white;
-  padding: 20px 30px;
+  background: linear-gradient(135deg, #0a2436 0%, #123b57 100%);
+  color: #f4f9ff;
+  padding: 26px 40px;
+  box-shadow: 0 8px 20px rgba(10, 36, 54, 0.2);
 }
 
 .board-title {
-  flex: 1;
-  text-align: center;
+  min-width: 0;
 }
 
-.board-title h1 {
+.board-title h2 {
   margin: 0;
-  font-size: 32px;
+  color: #00304d;
+  font-size: 30px;
+  font-weight: 700;
 }
 
 .board-title p {
   margin: 8px 0 0;
-  color: #d7e4ea;
-  font-size: 17px;
+  color: #71808a;
+  font-size: 14px;
 }
 
 .board-actions {
@@ -52,7 +86,6 @@ body {
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
-  margin-left: auto;
 }
 
 /* =========================
@@ -61,21 +94,23 @@ body {
 
 .back-button,
 .new-note-button {
-  background: #073b55;
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 11px 18px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: none;
   border-radius: 8px;
-  font-weight: bold;
+  background: #073b55;
+  color: #ffffff;
   font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.2s;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .back-button:hover,
 .new-note-button:hover {
-  background: #0d4a68;
+  background: #0b526f;
   transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(7, 59, 85, 0.2);
 }
 
 /* =========================
@@ -83,23 +118,24 @@ body {
 ========================= */
 
 .board {
+  flex: 1;
   position: relative;
 
-  margin: 25px;
-
-  min-height: calc(100vh - 200px);
+  width: 100%;
+  min-height: 0;
+  margin: 0;
 
   background: #e7eef2;
 
-  border: 2px solid #b7c9d2;
+  border: 1px solid #dce7ee;
 
-  border-radius: 18px;
+  border-radius: 12px;
 
   overflow: auto;
 
   box-shadow:
-    inset 0 0 25px
-    rgba(7, 59, 85, 0.04);
+    0 10px 28px rgba(5, 18, 28, 0.12),
+    inset 0 0 25px rgba(7, 59, 85, 0.04);
 }
 
 /* =========================
@@ -190,6 +226,8 @@ body {
   color: #263238;
 
   font-size: 21px;
+
+  word-break: break-word;
 }
 
 .note-text {
@@ -200,6 +238,10 @@ body {
   line-height: 1.5;
 
   margin-bottom: 15px;
+
+  white-space: pre-wrap;
+
+  word-break: break-word;
 }
 
 /* =========================
@@ -239,11 +281,13 @@ body {
 
   background: white;
 
-  border: 2px solid #b7c9d2;
+  color: #111827;
+
+  border: 1px solid rgba(0, 0, 0, 0.15);
 }
 
 /* =========================
-   EDICIÓN
+   EDICIÓN DIRECTA
 ========================= */
 
 .note-title {
@@ -262,6 +306,16 @@ body {
   background: #ffffff;
 
   color: #111827;
+
+  outline: none;
+}
+
+.note-title:focus {
+  border-color: #073b55;
+
+  box-shadow:
+    0 0 0 2px
+    rgba(7, 59, 85, 0.12);
 }
 
 .note-content {
@@ -284,6 +338,16 @@ body {
   background: #ffffff;
 
   color: #111827;
+
+  outline: none;
+}
+
+.note-content:focus {
+  border-color: #073b55;
+
+  box-shadow:
+    0 0 0 2px
+    rgba(7, 59, 85, 0.12);
 }
 
 .note-status {
@@ -302,6 +366,14 @@ body {
   color: #111827;
 
   font-weight: bold;
+
+  cursor: pointer;
+
+  outline: none;
+}
+
+.note-status:focus {
+  border-color: #073b55;
 }
 
 .status-select,
@@ -311,14 +383,8 @@ body {
   box-sizing: border-box;
 }
 
-.status-select {
-  background: #ffffff;
-  color: #111827;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-}
-
 /* =========================
-   BOTONES
+   BOTONES DE LA NOTA
 ========================= */
 
 .note-buttons {
@@ -385,17 +451,393 @@ body {
   background: #555;
 }
 
+/* =========================================================
+   VENTANA EMERGENTE - NUEVA NOTA
+   SOLO APARECE AL CREAR UNA NUEVA NOTA
+========================================================= */
+
+.modal-overlay {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  background: rgba(7, 59, 85, 0.58);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  z-index: 99999;
+}
+
+/* =========================
+   CAJA DEL MODAL
+========================= */
+
+.note-modal {
+  width: 100%;
+
+  max-width: 540px;
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  background: #ffffff;
+
+  border-radius: 18px;
+
+  padding: 30px;
+
+  box-shadow:
+    0 20px 60px
+    rgba(0, 0, 0, 0.28);
+
+  border-top: 5px solid #39a900;
+
+  color: #00304d;
+
+  animation: aparecerModal 0.25s ease-out;
+}
+
+@keyframes aparecerModal {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(-20px)
+      scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+/* =========================
+   ENCABEZADO DEL MODAL
+========================= */
+
+.modal-header {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-bottom: 25px;
+}
+
+.modal-header h2 {
+  margin: 0;
+
+  color: #00304d;
+
+  font-size: 27px;
+
+  font-weight: 700;
+}
+
+.modal-header p {
+  margin: 7px 0 0;
+
+  color: #6c7a83;
+
+  font-size: 14px;
+}
+
+/* =========================
+   CERRAR MODAL
+========================= */
+
+.modal-close {
+  width: 36px;
+
+  height: 36px;
+
+  min-width: 36px;
+
+  padding: 0;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: #eef2f4;
+
+  color: #00304d;
+
+  font-size: 24px;
+
+  line-height: 1;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.modal-close:hover {
+  background: #00304d;
+
+  color: #ffffff;
+
+  transform: rotate(5deg);
+}
+
+/* =========================
+   FORMULARIO DEL MODAL
+========================= */
+
+.form-group {
+  width: 100%;
+
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #00304d;
+
+  font-size: 14px;
+
+  font-weight: 700;
+}
+
+/* =========================
+   INPUT DEL MODAL
+========================= */
+
+.note-modal .form-group input {
+  display: block;
+
+  width: 100%;
+
+  height: 46px;
+
+  padding: 0 13px;
+
+  border: 1px solid #d4dce1;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: #24343d;
+
+  font-family: Arial, sans-serif;
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.note-modal .form-group input:focus {
+  border-color: #39a900;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(57, 169, 0, 0.12);
+}
+
+.note-modal .form-group input::placeholder {
+  color: #9aa6ad;
+
+  opacity: 1;
+}
+
+/* =========================
+   TEXTAREA DEL MODAL
+========================= */
+
+.note-modal .form-group textarea {
+  display: block;
+
+  width: 100%;
+
+  min-height: 135px;
+
+  padding: 12px 13px;
+
+  border: 1px solid #d4dce1;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: #24343d;
+
+  font-family: Arial, sans-serif;
+
+  font-size: 15px;
+
+  line-height: 1.5;
+
+  resize: vertical;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.note-modal .form-group textarea:focus {
+  border-color: #39a900;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(57, 169, 0, 0.12);
+}
+
+.note-modal .form-group textarea::placeholder {
+  color: #9aa6ad;
+
+  opacity: 1;
+}
+
+/* =========================
+   SELECT DEL MODAL
+========================= */
+
+.note-modal .form-group select {
+  display: block;
+
+  width: 100%;
+
+  height: 46px;
+
+  padding: 0 13px;
+
+  border: 1px solid #d4dce1;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: #24343d;
+
+  font-family: Arial, sans-serif;
+
+  font-size: 15px;
+
+  font-weight: normal;
+
+  cursor: pointer;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.note-modal .form-group select:focus {
+  border-color: #39a900;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(57, 169, 0, 0.12);
+}
+
+/* =========================
+   BOTONES DEL MODAL
+========================= */
+
+.modal-actions {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: flex-end;
+
+  gap: 12px;
+
+  margin-top: 28px;
+}
+
+.cancel-modal-button,
+.save-modal-button {
+  height: 44px;
+
+  padding: 0 22px;
+
+  border: none;
+
+  border-radius: 9px;
+
+  font-family: Arial, sans-serif;
+
+  font-size: 14px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+/* CANCELAR */
+
+.cancel-modal-button {
+  background: #eef1f3;
+
+  color: #34434c;
+}
+
+.cancel-modal-button:hover {
+  background: #dfe4e7;
+}
+
+/* CREAR */
+
+.save-modal-button {
+  background: #073b55;
+
+  color: #ffffff;
+}
+
+.save-modal-button:hover {
+  background: #0b526f;
+
+  transform: translateY(-1px);
+}
+
 /* =========================
    RESPONSIVE
 ========================= */
 
 @media (max-width: 800px) {
-
-  .board-title {
-    width: 300px;
+  .board-content {
+    padding: 25px;
   }
 
-  .board-title h1 {
+  .board-card {
+    padding: 25px;
+  }
+
+  .board-title h2 {
     font-size: 24px;
   }
 
@@ -408,11 +850,57 @@ body {
   }
 
   .new-note-button {
-    right: 15px;
-
     padding: 10px 12px;
 
     font-size: 12px;
   }
 
+  .board {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .board-content {
+    padding: 20px 18px;
+  }
+
+  .board-card {
+    padding: 20px;
+  }
+
+  .board-list-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .board-actions,
+  .new-note-button {
+    width: 100%;
+  }
+
+  .modal-overlay {
+    padding: 15px;
+  }
+
+  .note-modal {
+    max-height: 92vh;
+
+    padding: 22px;
+
+    border-radius: 15px;
+  }
+
+  .modal-header h2 {
+    font-size: 23px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .cancel-modal-button,
+  .save-modal-button {
+    width: 100%;
+  }
 }
