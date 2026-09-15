@@ -1,0 +1,338 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: AWS::Serverless-2016-10-31
+
+Description: APP PRUEBA - Arquitectura AWS con EC2, Lambda, S3 y CloudFront
+
+Globals:
+  Function:
+    Timeout: 10
+    Runtime: nodejs20.x
+    MemorySize: 256
+
+Parameters:
+
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Nombre de la clave SSH para acceder a EC2
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC donde se ejecutara la API
+
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subred donde se ejecutara la API
+
+  ApiImageUri:
+    Type: String
+    Description: URI de la imagen Docker del backend
+
+  DbHost:
+    Type: String
+    Description: Host de PostgreSQL para la API
+
+  DbName:
+    Type: String
+    Default: app_prueba
+    Description: Nombre de la base de datos
+
+  DbUser:
+    Type: String
+    Default: app_prueba
+    Description: Usuario de PostgreSQL
+
+  DbPassword:
+    Type: String
+    NoEcho: true
+    Description: Contraseña de PostgreSQL
+
+  JwtSecret:
+    Type: String
+    NoEcho: true
+    Description: Clave secreta utilizada para JWT
+
+
+Resources:
+
+  # =====================================================
+  # LAMBDA - METRICAS DEL TABLERO
+  # =====================================================
+
+  MetricsApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+
+
+  MetricsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: app-prueba-metrics
+      CodeUri: ../lambda/metrics
+      Handler: index.handler
+      Description: Calcula las metricas del tablero para el dashboard
+
+      Events:
+        MetricsApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MetricsApi
+            Path: /metrics
+            Method: post
+
+
+  # =====================================================
+  # S3 - FRONTEND
+  # =====================================================
+
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+
+  # =====================================================
+  # CLOUDFRONT - FRONTEND
+  # =====================================================
+
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+
+    Properties:
+      OriginAccessControlConfig:
+        Name: app-prueba-frontend-oac
+        Description: Acceso seguro de CloudFront al bucket S3
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+
+    Properties:
+
+      DistributionConfig:
+
+        Enabled: true
+
+        DefaultRootObject: index.html
+
+        Origins:
+
+          - Id: FrontendS3Origin
+
+            DomainName:
+              !GetAtt FrontendBucket.RegionalDomainName
+
+            OriginAccessControlId:
+              Ref: CloudFrontOriginAccessControl
+
+            S3OriginConfig: {}
+
+
+        DefaultCacheBehavior:
+
+          TargetOriginId: FrontendS3Origin
+
+          ViewerProtocolPolicy: redirect-to-https
+
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+
+          CachedMethods:
+            - GET
+            - HEAD
+
+
+        CustomErrorResponses:
+
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+
+
+        PriceClass: PriceClass_100
+
+
+  # =====================================================
+  # PERMISOS S3 PARA CLOUDFRONT
+  # =====================================================
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+
+    Properties:
+
+      Bucket:
+        Ref: FrontendBucket
+
+      PolicyDocument:
+
+        Version: '2012-10-17'
+
+        Statement:
+
+          - Sid: AllowCloudFrontRead
+
+            Effect: Allow
+
+            Principal:
+              Service: cloudfront.amazonaws.com
+
+            Action:
+              - s3:GetObject
+
+            Resource:
+              - !Sub '${FrontendBucket.Arn}/*'
+
+            Condition:
+
+              StringEquals:
+
+                AWS:SourceArn:
+                  !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+
+
+  # =====================================================
+  # EC2 - API DOCKERIZADA
+  # =====================================================
+
+  ApiSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+
+    Properties:
+
+      GroupDescription: Acceso HTTP a la API de APP PRUEBA
+
+      VpcId:
+        Ref: VpcId
+
+      SecurityGroupIngress:
+
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+
+
+  ApiEC2:
+    Type: AWS::EC2::Instance
+
+    Properties:
+
+      ImageId: !Sub '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64}}'
+
+      InstanceType: t3.micro
+
+      KeyName:
+        Ref: KeyName
+
+      SubnetId:
+        Ref: SubnetId
+
+      SecurityGroupIds:
+        - Ref: ApiSecurityGroup
+
+      Tags:
+
+        - Key: Name
+          Value: app-prueba-api
+
+      UserData:
+
+        Fn::Base64:
+
+          !Sub |
+
+            #!/bin/bash
+
+            dnf update -y
+
+            dnf install -y docker
+
+            systemctl enable docker
+
+            systemctl start docker
+
+            docker pull ${ApiImageUri}
+
+            docker run -d \
+              --name app-prueba-api \
+              -p 3000:3000 \
+              -e PORT=3000 \
+              -e DB_HOST=${DbHost} \
+              -e DB_NAME=${DbName} \
+              -e DB_USER=${DbUser} \
+              -e DB_PASSWORD=${DbPassword} \
+              -e JWT_SECRET=${JwtSecret} \
+              ${ApiImageUri}
+
+
+# =====================================================
+# OUTPUTS
+# =====================================================
+
+Outputs:
+
+  # =====================================================
+  # LAMBDA
+  # =====================================================
+
+  MetricsApiUrl:
+
+    Description: URL de la API Lambda de metricas
+
+    Value:
+      !Sub 'https://${MetricsApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/metrics'
+
+
+  # =====================================================
+  # S3
+  # =====================================================
+
+  FrontendBucketName:
+
+    Description: Bucket S3 donde se publica el frontend
+
+    Value:
+      Ref: FrontendBucket
+
+
+  # =====================================================
+  # CLOUDFRONT
+  # =====================================================
+
+  CloudFrontUrl:
+
+    Description: URL publica del frontend mediante CloudFront
+
+    Value:
+      !Sub 'https://${CloudFrontDistribution.DomainName}'
+
+
+  # =====================================================
+  # EC2
+  # =====================================================
+
+  ApiEC2PublicIp:
+
+    Description: IP publica de la instancia EC2
+
+    Value:
+      !GetAtt ApiEC2.PublicIp
