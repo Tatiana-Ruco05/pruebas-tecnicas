@@ -91,45 +91,53 @@ function Dashboard() {
             MÉTRICAS
         ================================================= */}
 
-        <section className="metrics">
+        <section className="metrics-section">
 
-          <div className="metric-card">
-
-            <span className="metric-title">
-              Total de notas
-            </span>
-
-            <strong>{total}</strong>
-
+          <div className="metrics-header">
+            <h3>Indicadores clave</h3>
           </div>
 
-          <div className="metric-card">
+          <div className="metrics">
 
-            <span className="metric-title">
-              Pendientes
-            </span>
+            <div className="metric-card">
 
-            <strong>{pendientes}</strong>
+              <span className="metric-title">
+                Total de registros
+              </span>
 
-          </div>
+              <strong>{total}</strong>
 
-          <div className="metric-card">
+            </div>
 
-            <span className="metric-title">
-              En curso
-            </span>
+            <div className="metric-card">
 
-            <strong>{enCurso}</strong>
+              <span className="metric-title">
+                Pendientes
+              </span>
 
-          </div>
+              <strong>{pendientes}</strong>
 
-          <div className="metric-card">
+            </div>
 
-            <span className="metric-title">
-              Hechas
-            </span>
+            <div className="metric-card">
 
-            <strong>{hechas}</strong>
+              <span className="metric-title">
+                En curso
+              </span>
+
+              <strong>{enCurso}</strong>
+
+            </div>
+
+            <div className="metric-card">
+
+              <span className="metric-title">
+                Finalizadas
+              </span>
+
+              <strong>{hechas}</strong>
+
+            </div>
 
           </div>
 

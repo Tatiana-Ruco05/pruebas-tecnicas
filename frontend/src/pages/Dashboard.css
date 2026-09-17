@@ -384,6 +384,34 @@
    MÉTRICAS
 ========================================================= */
 
+.metrics-section {
+  width: 100%;
+}
+
+.metrics-header {
+  margin-bottom: 16px;
+
+  padding: 10px 14px;
+
+  border-left: 4px solid #39a900;
+
+  background: rgba(57, 169, 0, 0.08);
+
+  border-radius: 8px;
+}
+
+.metrics-header h3 {
+  margin: 0;
+
+  color: #00304d;
+
+  font-size: 18px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.3px;
+}
+
 .metrics {
   display: grid;
 
